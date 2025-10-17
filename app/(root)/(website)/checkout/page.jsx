@@ -49,6 +49,7 @@ const Checkout = () => {
     const [placingOrder, setPlacingOrder] = useState(false)
     const [savingOrder, setSavingOrder] = useState(false)
     const [paymentMethod, setPaymentMethod] = useState('online') // 'online' or 'cod'
+    const [razorpayLoaded, setRazorpayLoaded] = useState(false)
     useEffect(() => {
         if (getVerifiedCartData && getVerifiedCartData.success) {
             const cartData = getVerifiedCartData.data
@@ -64,9 +65,19 @@ const Checkout = () => {
     useEffect(() => {
         const cartProducts = cart.products
 
-        const subTotalAmount = cartProducts.reduce((sum, product) => sum + (product.sellingPrice * product.qty), 0)
+        const subTotalAmount = cartProducts.reduce((sum, product) => {
+            if (product && product.sellingPrice && product.qty) {
+                return sum + (product.sellingPrice * product.qty)
+            }
+            return sum
+        }, 0)
 
-        const discount = cartProducts.reduce((sum, product) => sum + ((product.mrp - product.sellingPrice) * product.qty), 0)
+        const discount = cartProducts.reduce((sum, product) => {
+            if (product && product.mrp && product.sellingPrice && product.qty) {
+                return sum + ((product.mrp - product.sellingPrice) * product.qty)
+            }
+            return sum
+        }, 0)
 
         setSubTotal(subTotalAmount)
         setDiscount(discount)
@@ -163,6 +174,28 @@ const Checkout = () => {
         }
     }, [authStore])
 
+    useEffect(() => {
+        // Load Razorpay script immediately
+        const script = document.createElement('script')
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+        script.async = true
+        script.onload = () => {
+            console.log('Razorpay script loaded successfully')
+            setRazorpayLoaded(true)
+        }
+        script.onerror = () => {
+            console.error('Failed to load Razorpay script')
+        }
+        
+        if (!document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')) {
+            document.head.appendChild(script)
+        } else if (window.Razorpay) {
+            setRazorpayLoaded(true)
+        }
+    }, [])
+
+
+
     // get order id 
     const getOrderId = async (amount) => {
         try {
@@ -219,18 +252,48 @@ const Checkout = () => {
             return placeOrderCOD(formData)
         }
  
+        console.log('Starting online payment process...')
+        console.log('Total Amount:', totalAmount)
+        console.log('Form Data:', formData)
+        
         setPlacingOrder(true)
         try {
+            // Wait for Razorpay to load
+            if (!window.Razorpay) {
+                showToast('info', 'Loading payment gateway...')
+                // Wait up to 10 seconds for Razorpay to load
+                for (let i = 0; i < 100; i++) {
+                    if (window.Razorpay) break
+                    await new Promise(resolve => setTimeout(resolve, 100))
+                }
+                
+                if (!window.Razorpay) {
+                    throw new Error('Payment gateway failed to load. Please refresh and try again.')
+                }
+            }
+            console.log('Razorpay SDK loaded successfully')
+
+            console.log('Generating order ID...')
             const generateOrderId = await getOrderId(totalAmount)
+            console.log('Order ID response:', generateOrderId)
+            
             if (!generateOrderId.success) {
                 throw new Error(generateOrderId.message)
             }
 
             const order_id = generateOrderId.order_id
+            console.log('Generated Order ID:', order_id)
+
+            // Validate Razorpay key
+            const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+            if (!razorpayKey) {
+                throw new Error('Razorpay key not configured')
+            }
+            console.log('Using Razorpay Key:', razorpayKey)
 
             const razOption = {
-                "key": process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                "amount": totalAmount * 100,
+                "key": razorpayKey,
+                "amount": Math.round(totalAmount * 100), // Ensure integer
                 "currency": "INR",
                 "name": "Atriya Handicrafts",
                 "description": "Payment for order",
@@ -238,35 +301,37 @@ const Checkout = () => {
                 "order_id": order_id,
                 "handler": async function (response) {
                     setSavingOrder(true)
-                    const products = verifiedCartData.map((cartItem) => (
-                        {
+                    try {
+                        const products = verifiedCartData.map((cartItem) => ({
                             productId: cartItem.productId,
                             variantId: cartItem.variantId,
                             name: cartItem.name,
                             qty: cartItem.qty,
                             mrp: cartItem.mrp,
                             sellingPrice: cartItem.sellingPrice,
+                        }))
+
+                        const { data: paymentResponseData } = await axios.post('/api/payment/save-order', {
+                            ...formData,
+                            ...response,
+                            products: products,
+                            subtotal: subtotal,
+                            discount: discount,
+                            couponDiscountAmount: couponDiscountAmount,
+                            totalAmount: totalAmount
+                        })
+
+                        if (paymentResponseData.success) {
+                            showToast('success', paymentResponseData.message)
+                            dispatch(clearCart())
+                            orderForm.reset()
+                            router.push(WEBSITE_ORDER_DETAILS(response.razorpay_order_id))
+                        } else {
+                            showToast('error', paymentResponseData.message)
                         }
-                    ))
-
-                    const { data: paymentResponseData } = await axios.post('/api/payment/save-order', {
-                        ...formData,
-                        ...response,
-                        products: products,
-                        subtotal: subtotal,
-                        discount: discount,
-                        couponDiscountAmount: couponDiscountAmount,
-                        totalAmount: totalAmount
-                    })
-
-                    if (paymentResponseData.success) {
-                        showToast('success', paymentResponseData.message)
-                        dispatch(clearCart())
-                        orderForm.reset()
-                        router.push(WEBSITE_ORDER_DETAILS(response.razorpay_order_id))
-                        setSavingOrder(false)
-                    } else {
-                        showToast('error', paymentResponseData.message)
+                    } catch (error) {
+                        showToast('error', 'Failed to save order: ' + error.message)
+                    } finally {
                         setSavingOrder(false)
                     }
                 },
@@ -275,17 +340,22 @@ const Checkout = () => {
                     "email": formData.email,
                     "contact": formData.phone
                 },
-
                 "theme": {
                     "color": "#7c3aed"
                 }
             }
 
-            const rzp = new Razorpay(razOption)
+            console.log('Razorpay options:', razOption)
+            
+            const rzp = new window.Razorpay(razOption)
+            
             rzp.on('payment.failed', function (response) {
-                showToast('error', response.error.description)
+                console.error('Payment failed:', response)
+                showToast('error', response.error.description || 'Payment failed')
+                setSavingOrder(false)
             });
 
+            console.log('Opening Razorpay checkout...')
             rzp.open()
 
         } catch (error) {
@@ -624,7 +694,7 @@ const Checkout = () => {
                 </div>
             }
 
-            <Script src='https://checkout.razorpay.com/v1/checkout.js' />
+
         </div>
     )
 }

@@ -15,7 +15,7 @@ import axios from 'axios'
 import useFetch from '@/hooks/useFetch'
 import Select from '@/components/Application/Select'
 import Editor from '@/components/Application/Admin/Editor'
-import MediaModal from '@/components/Application/Admin/MediaModal'
+import MediaModal from '@/components/Application/ADMIN/MediaModal'
 import Image from 'next/image'
 const breadcrumbData = [
   { href: ADMIN_DASHBOARD, label: 'Home' },

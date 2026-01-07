@@ -1,12 +1,15 @@
 'use client'
 import UserPanelLayout from '@/components/Application/Website/UserPanelLayout'
 import WebsiteBreadcrumb from '@/components/Application/Website/WebsiteBreadcrumb'
+import { Button } from '@/components/ui/button'
 import useFetch from '@/hooks/useFetch';
 import { WEBSITE_ORDER_DETAILS } from '@/routes/WebsiteRoute';
+import { ADMIN_DASHBOARD } from '@/routes/AdminPanelRoute';
 import Link from 'next/link';
 import React from 'react'
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { IoCartOutline } from "react-icons/io5";
+import { MdAdminPanelSettings } from "react-icons/md";
 import { useSelector } from 'react-redux';
 
 const breadCrumbData = {
@@ -15,6 +18,7 @@ const breadCrumbData = {
 }
 const MyAccount = () => {
     const { data: dashboardData } = useFetch('/api/dashboard/user')
+    const { data: user } = useFetch('/api/profile/get')
     const cartStore = useSelector(store => store.cartStore)
 
     return (
@@ -22,8 +26,16 @@ const MyAccount = () => {
             <WebsiteBreadcrumb props={breadCrumbData} />
             <UserPanelLayout>
                 <div className='shadow rounded'>
-                    <div className='p-5 text-xl font-semibold border'>
-                        Dashboard
+                    <div className='p-5 text-xl font-semibold border flex justify-between items-center'>
+                        <span>Dashboard</span>
+                        {user?.data?.role === 'admin' && (
+                            <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                                <Link href={ADMIN_DASHBOARD}>
+                                    <MdAdminPanelSettings className="mr-2" />
+                                    Admin Panel
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                     <div className='p-5'>
                         <div className='grid lg:grid-cols-2 grid-cols-1 gap-10'>

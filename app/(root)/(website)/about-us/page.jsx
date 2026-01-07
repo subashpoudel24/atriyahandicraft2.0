@@ -10,7 +10,7 @@ const AboutUs = () => {
     <div className="bg-background">
       <WebsiteBreadcrumb props={breadcrumb} />
 
-      <section className="relative bg-gradient-to-r from-primary/10 to-accent/10 py-20">
+      <section className="relative bg-linear-to-r from-primary/10 to-accent/10 py-20">
         <div className="container mx-auto px-5 lg:px-40">
           <div className="text-center">
             <h1 className="text-4xl lg:text-6xl font-bold text-foreground mb-6">Atriya Handicraft</h1>
@@ -219,7 +219,7 @@ const AboutUs = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-primary to-accent">
+      <section className="py-20 bg-linear-to-r from-primary to-accent">
         <div className="container mx-auto px-5 lg:px-40 text-center">
           <h2 className="text-3xl font-bold text-primary-foreground mb-4">Experience Authentic Nepalese Luxury</h2>
           <p className="text-primary-foreground/90 mb-8 max-w-2xl mx-auto">

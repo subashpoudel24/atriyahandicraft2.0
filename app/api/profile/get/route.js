@@ -8,7 +8,12 @@ export async function GET() {
         await connectDB()
         const auth = await isAuthenticated('user')
         if (!auth.isAuth) {
-            return response(false, 401, 'Unauthorized')
+            // Try admin authentication if user auth fails
+            const adminAuth = await isAuthenticated('admin')
+            if (!adminAuth.isAuth) {
+                return response(false, 401, 'Unauthorized')
+            }
+            auth.userId = adminAuth.userId
         }
 
         const userId = auth.userId

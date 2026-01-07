@@ -1,5 +1,10 @@
 export const ADMIN_DASHBOARD = '/admin/dashboard'
 
+// Banner routes
+export const ADMIN_BANNER_ADD = '/admin/banner/add'
+export const ADMIN_BANNER_SHOW = '/admin/banner'
+export const ADMIN_BANNER_EDIT = (id) => id ? `/admin/banner/edit/${id}` : ''
+
 // Media routes 
 export const ADMIN_MEDIA_SHOW = '/admin/media'
 export const ADMIN_MEDIA_EDIT = (id) => id ? `ADMIN_MEDIA_SHOW/edit/${id}` : ''

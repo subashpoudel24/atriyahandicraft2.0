@@ -24,7 +24,7 @@ export async function middleware(request) {
 
         // prevent logged-in users from accessing auth routes 
         if (pathname.startsWith('/auth')) {
-            return NextResponse.redirect(new URL(role === 'admin' ? ADMIN_DASHBOARD : USER_DASHBOARD, request.nextUrl))
+            return NextResponse.redirect(new URL(USER_DASHBOARD, request.nextUrl))
         }
 
 
@@ -34,9 +34,8 @@ export async function middleware(request) {
         }
 
 
-        // protect user route  
-
-        if (pathname.startsWith('/my-account') && role !== 'user') {
+        // protect user route - allow both user and admin roles
+        if (pathname.startsWith('/my-account') && role !== 'user' && role !== 'admin') {
             return NextResponse.redirect(new URL(WEBSITE_LOGIN, request.nextUrl))
         }
 

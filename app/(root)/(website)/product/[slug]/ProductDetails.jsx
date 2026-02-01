@@ -21,9 +21,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { addIntoCart } from "@/store/reducer/cartReducer";
 import { showToast } from "@/lib/showToast";
 import { Button } from "@/components/ui/button";
-import loadingSvg from '@/public/assets/images/loading.svg'
 import ProductReveiw from "@/components/Application/Website/ProductReveiw";
-const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
+
+const ProductDetails = ({ product, reviewCount }) => {
 
     const dispatch = useDispatch()
     const cartStore = useSelector(store => store.cartStore)
@@ -31,25 +31,32 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
     const [activeThumb, setActiveThumb] = useState()
     const [qty, setQty] = useState(1)
     const [isAddedIntoCart, setIsAddedIntoCart] = useState(false)
-    const [isProductLoading, setIsProductLoading] = useState(false)
+    const [selectedColor, setSelectedColor] = useState('')
+    const [selectedSize, setSelectedSize] = useState('')
+    
     useEffect(() => {
-        setActiveThumb(variant?.media[0]?.secure_url)
-    }, [variant])
-
-    useEffect(() => {
-        if (cartStore.count > 0) {
-            const existingProduct = cartStore.products.findIndex((cartProduct) => cartProduct.productId === product._id && cartProduct.variantId === variant._id)
-
-            if (existingProduct >= 0) {
-                setIsAddedIntoCart(true)
-            } else {
-                setIsAddedIntoCart(false)
-            }
+        if (product?.media?.[0]) {
+            const imageUrl = product.media[0].secure_url || product.media[0].path
+            setActiveThumb(imageUrl)
         }
+        // Set default selections
+        if (product?.colors?.[0]) setSelectedColor(product.colors[0])
+        if (product?.sizes?.[0]) setSelectedSize(product.sizes[0])
+    }, [product])
 
-        setIsProductLoading(false)
-
-    }, [variant])
+    useEffect(() => {
+        if (cartStore.count > 0 && selectedColor && selectedSize && product?._id) {
+            const existingProduct = cartStore.products.findIndex((cartProduct) => 
+                cartProduct && 
+                cartProduct.productId === product._id && 
+                cartProduct.color === selectedColor && 
+                cartProduct.size === selectedSize
+            )
+            setIsAddedIntoCart(existingProduct >= 0)
+        } else {
+            setIsAddedIntoCart(false)
+        }
+    }, [product?._id, selectedColor, selectedSize, cartStore.count])
 
     const handleThumb = (thumbUrl) => {
         setActiveThumb(thumbUrl)
@@ -65,35 +72,36 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
         }
     }
 
-
     const handleAddToCart = () => {
+        // Check if color/size selection is required
+        if (product.colors && product.colors.length > 0 && !selectedColor) {
+            showToast('error', 'Please select a color')
+            return
+        }
+        if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+            showToast('error', 'Please select a size')
+            return
+        }
+
         const cartProduct = {
             productId: product._id,
-            variantId: variant._id,
             name: product.name,
             url: product.slug,
-            size: variant.size,
-            color: variant.color,
-            mrp: variant.mrp,
-            sellingPrice: variant.sellingPrice,
-            media: variant?.media[0]?.secure_url,
+            mrp: product.mrp,
+            sellingPrice: product.sellingPrice,
+            media: product?.media?.[0]?.secure_url,
+            color: selectedColor,
+            size: selectedSize,
             qty: qty
         }
 
         dispatch(addIntoCart(cartProduct))
         setIsAddedIntoCart(true)
-        showToast('success', 'Product added into cart.')
+        showToast('success', 'Product added to cart')
     }
 
     return (
         <div className="lg:px-32 px-4">
-
-            {isProductLoading &&
-                <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50">
-                    <Image src={loadingSvg} width={80} height={80} alt="Loading" />
-                </div>
-            }
-
             <div className="my-10">
                 <Breadcrumb>
                     <BreadcrumbList>
@@ -117,26 +125,37 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
             <div className="md:flex justify-between items-start lg:gap-10 gap-5 mb-20">
                 <div className="md:w-1/2 xl:flex xl:justify-center xl:gap-5 md:sticky md:top-0">
                     <div className="xl:order-last xl:mb-0 mb-5 xl:w-[calc(100%-144px)]">
-                        <Image
-                            src={activeThumb || imgPlaceholder.src}
-                            width={650}
-                            height={650}
-                            alt="product"
-                            className="border rounded max-w-full"
+                        <img
+                            src={activeThumb || product?.media?.[0]?.secure_url || product?.media?.[0]?.path || imgPlaceholder.src}
+                            width="650"
+                            height="650"
+                            alt={product?.name}
+                            className="border rounded max-w-full w-full h-auto transition-opacity duration-300"
+                            onError={(e) => {
+                                e.target.src = imgPlaceholder.src
+                            }}
                         />
                     </div>
                     <div className="flex xl:flex-col items-center xl:gap-5 gap-3 xl:w-36 overflow-auto xl:pb-0 pb-2 max-h-[600px]">
-                        {variant?.media?.map((thumb) => (
-                            <Image
-                                key={thumb._id}
-                                src={thumb?.secure_url || imgPlaceholder.src}
-                                width={100}
-                                height={100}
-                                alt="product thumbnail"
-                                className={`md:max-w-full max-w-16 rounded cursor-pointer ${thumb.secure_url === activeThumb ? 'border-2 border-primary' : 'border'}`}
-                                onClick={() => handleThumb(thumb.secure_url)}
-                            />
-                        ))}
+                        {(product?.media || []).map((thumb, index) => {
+                            const thumbUrl = thumb?.secure_url || thumb?.path
+                            return (
+                                <img
+                                    key={thumb._id || index}
+                                    src={thumbUrl || imgPlaceholder.src}
+                                    width={100}
+                                    height={100}
+                                    alt={`${product?.name} view ${index + 1}`}
+                                    className={`md:max-w-full max-w-16 rounded cursor-pointer transition-all duration-200 hover:scale-105 ${
+                                        thumbUrl === activeThumb ? 'border-2 border-primary shadow-md' : 'border hover:border-primary/50'
+                                    }`}
+                                    onClick={() => handleThumb(thumbUrl)}
+                                    onError={(e) => {
+                                        e.target.src = imgPlaceholder.src
+                                    }}
+                                />
+                            )
+                        })}
                     </div>
                 </div>
 
@@ -149,53 +168,64 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
                         <span className="text-sm ps-2">({reviewCount} Reviews)</span>
                     </div>
                     <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xl font-semibold">{variant.sellingPrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
-                        <span className="text-sm line-through text-gray-500">{variant.mrp.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
-
-
-                        <span className="bg-red-500 rounded-2xl px-3 py-1 text-white text-xs ms-5">-{variant.discountPercentage}%</span>
-
-
+                        <span className="text-xl font-semibold">{product.sellingPrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
+                        <span className="text-sm line-through text-gray-500">{product.mrp.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
+                        <span className="bg-red-500 rounded-2xl px-3 py-1 text-white text-xs ms-5">-{product.discountPercentage}%</span>
                     </div>
 
                     <div className="line-clamp-3" dangerouslySetInnerHTML={{ __html: decode(product.description) }}></div>
 
+                    {product.colors && product.colors.length > 0 && (
+                        <div className="mt-5">
+                            <p className="mb-2">
+                                <span className="font-semibold">Color: </span>
+                                <span className="text-primary">{selectedColor}</span>
+                            </p>
+                            <div className="flex gap-2 flex-wrap">
+                                {product.colors.map((color, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setSelectedColor(color)}
+                                        className={`border py-2 px-4 rounded-lg text-sm transition-colors ${
+                                            selectedColor === color
+                                                ? 'bg-primary text-white border-primary'
+                                                : 'bg-secondary hover:bg-primary hover:text-white'
+                                        }`}
+                                    >
+                                        {color}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
-                    <div className="mt-5">
-                        <p className="mb-2">
-                            <span className="font-semibold">Color: </span> {variant?.color}
-                        </p>
-                        <div className="flex gap-5">
-                            {colors.map(color => (
-                                <Link onClick={() => setIsProductLoading(true)} href={`${WEBSITE_PRODUCT_DETAILS(product.slug)}?color=${color}&size=${variant.size}`}
-                                    key={color}
-                                    className={`border py-1 px-3 rounded-lg cursor-pointer hover:bg-primary hover:text-white ${color === variant.color ? 'bg-primary text-white' : ''}`}
-                                >
-                                    {color}
-                                </Link>
-                            ))}
+                    {product.sizes && product.sizes.length > 0 && (
+                        <div className="mt-5">
+                            <p className="mb-2">
+                                <span className="font-semibold">Size: </span>
+                                <span className="text-primary">{selectedSize}</span>
+                            </p>
+                            <div className="flex gap-2 flex-wrap">
+                                {product.sizes.map((size, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setSelectedSize(size)}
+                                        className={`border py-2 px-4 rounded-lg text-sm transition-colors ${
+                                            selectedSize === size
+                                                ? 'bg-primary text-white border-primary'
+                                                : 'bg-secondary hover:bg-primary hover:text-white'
+                                        }`}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                    <div className="mt-5">
-                        <p className="mb-2">
-                            <span className="font-semibold">Size: </span> {variant?.size}
-                        </p>
-                        <div className="flex gap-5">
-                            {sizes.map(size => (
-                                <Link onClick={() => setIsProductLoading(true)} href={`${WEBSITE_PRODUCT_DETAILS(product.slug)}?color=${variant.color}&size=${size}`}
-                                    key={size}
-                                    className={`border py-1 px-3 rounded-lg cursor-pointer hover:bg-primary hover:text-white ${size === variant.size ? 'bg-primary text-white' : ''}`}
-                                >
-                                    {size}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
+                    )}
 
                     <div className="mt-5">
                         <p className="font-bold mb-2">Quantity</p>
                         <div className="flex items-center h-10 border w-fit rounded-full">
-
                             <button type="button" className="h-full w-10 flex justify-center items-center" onClick={() => handleQty('desc')}>
                                 <HiMinus />
                             </button>
@@ -203,10 +233,8 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
                             <button type="button" className="h-full w-10 flex justify-center items-center" onClick={() => handleQty('inc')}>
                                 <HiPlus />
                             </button>
-
                         </div>
                     </div>
-
 
                     <div className="mt-5">
                         {!isAddedIntoCart ?
@@ -216,13 +244,9 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
                                 <Link href={WEBSITE_CART}>Go To Cart</Link>
                             </Button>
                         }
-
-
                     </div>
-
                 </div>
             </div>
-
 
             <div className="mb-10">
                 <div className="shadow rounded border">
@@ -236,7 +260,6 @@ const ProductDetails = ({ product, variant, colors, sizes, reviewCount }) => {
             </div>
 
             <ProductReveiw productId={product._id} />
-
         </div>
     )
 }

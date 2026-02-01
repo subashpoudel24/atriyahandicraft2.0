@@ -55,6 +55,8 @@ const EditProduct = ({ params }) => {
     sellingPrice: true,
     discountPercentage: true,
     description: true,
+    colors: true,
+    sizes: true,
   })
 
   const form = useForm({
@@ -68,6 +70,8 @@ const EditProduct = ({ params }) => {
       sellingPrice: 0,
       discountPercentage: 0,
       description: "",
+      colors: "",
+      sizes: "",
     },
   })
 
@@ -75,6 +79,10 @@ const EditProduct = ({ params }) => {
   useEffect(() => {
     if (getProduct && getProduct.success) {
       const product = getProduct.data
+      console.log('Product data received:', product)
+      console.log('Colors:', product?.colors)
+      console.log('Sizes:', product?.sizes)
+      
       form.reset({
         _id: product?._id,
         name: product?.name,
@@ -84,6 +92,8 @@ const EditProduct = ({ params }) => {
         sellingPrice: product?.sellingPrice,
         discountPercentage: product?.discountPercentage,
         description: product?.description,
+        colors: (product?.colors && Array.isArray(product.colors)) ? product.colors.join(', ') : '',
+        sizes: (product?.sizes && Array.isArray(product.sizes)) ? product.sizes.join(', ') : '',
       })
 
       if (product.media) {
@@ -246,6 +256,36 @@ const EditProduct = ({ params }) => {
                         <FormLabel>Discount Percentage <span className='text-red-500'>*</span></FormLabel>
                         <FormControl>
                           <Input type="number" readOnly placeholder="Enter Discount Percentage" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className=''>
+                  <FormField
+                    control={form.control}
+                    name="colors"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Colors</FormLabel>
+                        <FormControl>
+                          <Input type="text" placeholder="Enter colors (comma separated)" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className=''>
+                  <FormField
+                    control={form.control}
+                    name="sizes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sizes</FormLabel>
+                        <FormControl>
+                          <Input type="text" placeholder="Enter sizes (comma separated)" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

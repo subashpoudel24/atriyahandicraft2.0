@@ -41,6 +41,14 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    colors: [{
+        type: String,
+        trim: true
+    }],
+    sizes: [{
+        type: String,
+        trim: true
+    }],
     deletedAt: {
         type: Date,
         default: null,

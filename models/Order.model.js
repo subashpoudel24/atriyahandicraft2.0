@@ -1,6 +1,11 @@
 import { orderStatus } from "@/lib/utils"
 import mongoose from "mongoose"
 
+// Clear any existing model to ensure we use the updated schema
+if (mongoose.models.Order) {
+    delete mongoose.models.Order
+}
+
 const couponSchema = new mongoose.Schema({
     code: {
         type: String,
@@ -112,8 +117,10 @@ const orderSchema = new mongoose.Schema({
     products: [
         {
             productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-            variantId: { type: mongoose.Schema.Types.ObjectId, ref: 'ProductVariant', required: true },
             name: { type: String, required: true },
+            color: { type: String, required: true },
+            size: { type: String, required: true },
+            media: { type: String, required: true },
             qty: { type: Number, required: true },
             mrp: { type: Number, required: true },
             sellingPrice: { type: Number, required: true },

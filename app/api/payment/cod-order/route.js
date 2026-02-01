@@ -59,6 +59,8 @@ export async function POST(request) {
         })
 
         const savedOrder = await newOrder.save()
+        
+        console.log('COD Order created with products:', JSON.stringify(savedOrder.products, null, 2))
 
         return response(true, 201, 'Order placed successfully with Cash on Delivery!', {
             orderId: savedOrder.order_id,

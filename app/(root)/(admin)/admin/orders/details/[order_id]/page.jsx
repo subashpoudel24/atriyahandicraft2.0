@@ -38,6 +38,7 @@ const OrderDetails = ({ params }) => {
 
     useEffect(() => {
         if (data && data.success) {
+            console.log('Frontend received order data:', data.data)
             setOrderData(data.data)
             setOrderStatus(data?.data?.status)
         }
@@ -94,17 +95,30 @@ const OrderDetails = ({ params }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {orderData && orderData?.products?.map((product) => (
-                                        <tr key={product.variantId._id} className="md:table-row block border-b">
+                                    {orderData && orderData?.products?.map((product, index) => {
+                                        console.log('Product data:', product)
+                                        return (
+                                        <tr key={index} className="md:table-row block border-b">
                                             <td className="md:table-cell p-3">
                                                 <div className="flex items-center gap-5">
-                                                    <Image src={product?.variantId?.media[0]?.secure_url || placeholderImg.src} width={60} height={60} alt="product" className="rounded" />
+                                                    <Image 
+                                                        src={product?.productId?.media?.[0]?.secure_url || product?.media || placeholderImg.src} 
+                                                        width={60} 
+                                                        height={60} 
+                                                        alt="product" 
+                                                        className="rounded" 
+                                                    />
                                                     <div>
                                                         <h4 className="text-lg">
-                                                            <Link href={WEBSITE_PRODUCT_DETAILS(product?.productId?.slug)}>{product?.productId?.name}</Link>
-                                                            <p>Color: {product?.variantId?.color}</p>
-                                                            <p>Size: {product?.variantId?.size}</p>
+                                                            <Link href={WEBSITE_PRODUCT_DETAILS(product?.productId?.slug)}>
+                                                                {product?.productId?.name || product?.name}
+                                                            </Link>
                                                         </h4>
+                                                        <div className="text-sm text-gray-600 mt-1">
+                                                            <p><strong>Color:</strong> {product?.color || 'Not specified'}</p>
+                                                            <p><strong>Size:</strong> {product?.size || 'Not specified'}</p>
+                                                            {product?.productId?.category?.name && <p><strong>Category:</strong> {product.productId.category.name}</p>}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -121,7 +135,8 @@ const OrderDetails = ({ params }) => {
                                                 <span>{(product.qty * product.sellingPrice).toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
                                             </td>
                                         </tr>
-                                    ))}
+                                        )
+                                    })}
                                 </tbody>
                             </table>
 

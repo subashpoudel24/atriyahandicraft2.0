@@ -15,10 +15,15 @@ export async function GET(request, { params }) {
             return response(false, 404, 'Order not found.')
         }
 
-        const orderData = await OrderModel.findOne({ order_id: orderid }).populate('products.productId', 'name slug').populate({
-            path: 'products.variantId',
-            populate: { path: 'media' }
+        const orderData = await OrderModel.findOne({ order_id: orderid }).populate({
+            path: 'products.productId',
+            populate: [
+                { path: 'media' },
+                { path: 'category', select: 'name' }
+            ]
         }).lean()
+
+        console.log('Order data found:', JSON.stringify(orderData, null, 2))
 
         if (!orderData) {
             return response(false, 404, 'Order not found.')

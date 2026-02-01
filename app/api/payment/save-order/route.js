@@ -14,11 +14,13 @@ export async function POST(request) {
 
         const productSchema = z.object({
             productId: z.string().length(24, 'Invalid product id format'),
-            variantId: z.string().length(24, 'Invalid variant id format'),
             name: z.string().min(1),
             qty: z.number().min(1),
             mrp: z.number().nonnegative(),
-            sellingPrice: z.number().nonnegative()
+            sellingPrice: z.number().nonnegative(),
+            color: z.string().min(1, 'Color is required'),
+            size: z.string().min(1, 'Size is required'),
+            media: z.string().min(1, 'Media is required')
         })
 
         const orderSchema = zSchema.pick({
@@ -101,6 +103,8 @@ export async function POST(request) {
             coupon: validatedData.coupon,
             status: paymentVerification ? 'pending' : 'unverified'
         })
+        
+        console.log('Order created with products:', JSON.stringify(newOrder.products, null, 2))
 
         try {
             const mailData = {

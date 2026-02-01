@@ -1,72 +1,43 @@
-'use client'
-import Image from 'next/image'
-import React from 'react'
-import { useDispatch } from 'react-redux'
-import { addIntoCart } from '@/store/reducer/cartReducer'
-import { showToast } from '@/lib/showToast'
-import imgPlaceholder from '@/public/assets/images/img-placeholder.webp'
-import Link from 'next/link'
-import { WEBSITE_PRODUCT_DETAILS } from '@/routes/WebsiteRoute'
-import { Button } from '@/components/ui/button'
-import { ShoppingCart } from 'lucide-react'
+import Link from "next/link";
+
 const ProductBox = ({ product }) => {
-    const dispatch = useDispatch()
-
-    const handleAddToCart = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        
-        if (!product.variants || product.variants.length === 0) {
-            showToast('error', 'Product variants not available')
-            return
-        }
-        
-        const defaultVariant = product.variants[0]
-        const cartItem = {
-            productId: product._id,
-            variantId: defaultVariant._id,
-            name: product.name,
-            sellingPrice: product.sellingPrice,
-            mrp: product.mrp,
-            media: product.media[0]?.secure_url || imgPlaceholder.src,
-            color: defaultVariant.color,
-            size: defaultVariant.size,
-            qty: 1,
-            url: product.slug
-        }
-        
-        dispatch(addIntoCart(cartItem))
-        showToast('success', 'Added to cart successfully!')
-    }
-
     return (
-        <div className='rounded-lg hover:shadow-lg border overflow-hidden'>
-            <Link href={WEBSITE_PRODUCT_DETAILS(product.slug)}>
-                <Image
-                    src={product?.media[0]?.secure_url || imgPlaceholder.src}
-                    width={400}
-                    height={400}
-                    alt={product?.media[0]?.alt || product?.name}
-                    title={product?.media[0]?.title || product?.name}
-                    className='w-full lg:h-[300px] sm:h-[250px] h-[150px] object-cover object-top'
+        <div className="group bg-card rounded-sm overflow-hidden border border-border/50 hover:shadow-lg transition-all duration-500 hover:-translate-y-1">
+            <div className="relative aspect-[3/4] overflow-hidden bg-secondary/30">
+                <img
+                    src={product.media?.[0]?.secure_url || product.media?.[0]?.path || "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=400&h=400&fit=crop"}
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
                 />
-            </Link>
-            <div className="p-3 border-t">
-                <Link href={WEBSITE_PRODUCT_DETAILS(product.slug)}>
-                    <h4 className='hover:text-primary transition-colors'>{product?.name}</h4>
-                    <p className='flex gap-2 text-sm mt-2'>
-                        <span className='line-through text-gray-400'>{product?.mrp.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
-                        <span className='font-semibold'>{product?.sellingPrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
-                    </p>
+                
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                    <Link href={`/product/${product.slug || product._id}`} className="bg-white/90 backdrop-blur-sm text-primary p-3 rounded-full hover:bg-white hover:text-accent transition-colors">
+                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                       </svg>
+                    </Link>
+                    <button 
+                        onClick={() => window.location.href = `/product/${product.slug || product._id}`}
+                        className="bg-primary/90 backdrop-blur-sm text-white px-4 py-3 rounded-full font-medium text-sm hover:bg-primary transition-colors"
+                    >
+                        Add to Cart
+                    </button>
+                </div>
+                
+                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 text-xs uppercase tracking-widest font-medium text-primary shadow-sm">
+                    {product.category?.name || 'Handcrafted'}
+                </div>
+            </div>
+            
+            <div className="p-4 text-center">
+                <Link href={`/product/${product.slug || product._id}`}>
+                    <h3 className="font-serif text-lg text-foreground group-hover:text-primary transition-colors duration-300 mb-1 cursor-pointer">
+                        {product.name}
+                    </h3>
                 </Link>
-                <Button 
-                    onClick={handleAddToCart}
-                    className='w-full mt-3 bg-primary hover:bg-primary/90'
-                    size='sm'
-                >
-                    <ShoppingCart className='w-4 h-4 mr-2' />
-                    Add to Cart
-                </Button>
+                <p className="text-primary-foreground font-medium">${product.sellingPrice || product.mrp}</p>
             </div>
         </div>
     )

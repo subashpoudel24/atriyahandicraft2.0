@@ -1,150 +1,123 @@
-"use client"
-import "slick-carousel/slick/slick.css"
-import "slick-carousel/slick/slick-theme.css"
-import Slider from "react-slick"
-import { IoStar } from "react-icons/io5"
-import { BsChatQuote } from "react-icons/bs"
+"use client";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+import { BsQuote } from "react-icons/bs";
+import { FaStar } from "react-icons/fa";
 
 const testimonials = [
     {
         name: "Sophia Patel",
-        review:
-            "This product exceeded my expectations. The quality is top-notch and it arrived much faster than I anticipated. I will definitely be recommending it to my friends and family.",
-        rating: 5,
+        role: "Verified Buyer",
+        review: "The quality of this Pashmina is simply unmatched. I've owned many cashmere pieces, but this one has a softness and weave that is indescribable. Truly an heirloom piece.",
+        location: "London, UK",
+        initials: "SP"
     },
     {
         name: "James Thompson",
-        review:
-            "Customer service was extremely helpful and responsive. They guided me through every step of the process. I'm very satisfied with the support I received.",
-        rating: 4,
-    },
-    {
-        name: "Emily Chen",
-        review:
-            "I’ve been using this service for over a month now and it’s been amazing. The user interface is intuitive and everything runs smoothly. I haven’t faced any major issues so far.",
-        rating: 5,
-    },
-    {
-        name: "Liam Rodriguez",
-        review:
-            "Honestly, I was skeptical at first, but it turned out great. The features offered are well worth the price. There is room for improvement, but overall I’m happy with it.",
-        rating: 4,
-    },
-    {
-        name: "Ava Johnson",
-        review:
-            "The attention to detail is impressive. From packaging to performance, everything was handled professionally. I feel like I got great value for my money.",
-        rating: 5,
-    },
-    {
-        name: "Noah Davis",
-        review:
-            "There were a few hiccups during setup, but the documentation helped fix them quickly. Once everything was in place, it worked flawlessly. I'm a satisfied customer now.",
-        rating: 4,
+        role: "Textile Collector",
+        review: "Authentic Chyangra wool. You can feel the heritage and dedication in every thread. This shawl has become the centerpiece of my winter wardrobe.",
+        location: "New York, USA",
+        initials: "JT"
     },
     {
         name: "Isabella Martinez",
-        review:
-            "What stood out the most was how easy it was to get started. The onboarding process is smooth and well thought out. I appreciated the thoughtful design.",
-        rating: 5,
+        role: "Luxury Enthusiast",
+        review: "A masterpiece of traditional weaving. The detail in the embroidery is exquisite and the team's knowledge about the Himalayan heritage was truly impressive.",
+        location: "Milan, Italy",
+        initials: "IM"
     },
     {
-        name: "William Lee",
-        review:
-            "It does what it promises, no complaints there. The pricing is fair and the customer experience is excellent. I’ll be coming back for future purchases.",
-        rating: 4,
+        name: "Emily Chen",
+        role: "Regular Customer",
+        review: "I bought this silk-pashmina blend as a gift for my mother, and she was in tears. It's beautiful beyond words. The packaging itself was a work of art.",
+        location: "Toronto, Canada",
+        initials: "EC"
     },
-    {
-        name: "Mia Anderson",
-        review:
-            "I encountered a few bugs in the beginning, but support helped fix them quickly. Now everything works perfectly. The team really listens to feedback.",
-        rating: 4,
-    },
-    {
-        name: "Ethan Clark",
-        review:
-            "This has been one of the best investments I’ve made recently. The performance is consistent and it integrates seamlessly with my workflow. Highly recommended!",
-        rating: 5,
-    },
-]
+];
 
 const Testimonial = () => {
     const settings = {
         dots: true,
         infinite: true,
-        speed: 600, // Smoother transition
+        speed: 1200,
         autoplay: true,
-        autoplaySpeed: 4000, // Longer display time
+        autoplaySpeed: 6000,
         pauseOnHover: true,
-        slidesToShow: 3,
+        slidesToShow: 1,
         slidesToScroll: 1,
-        cssEase: "cubic-bezier(0.25, 0.46, 0.45, 0.94)", // Enhanced easing
-        responsive: [
-            {
-                breakpoint: 1024,
-                settings: {
-                    slidesToShow: 2,
-                    slidesToScroll: 1,
-                    dots: true,
-                    infinite: true,
-                },
-            },
-            {
-                breakpoint: 768,
-                settings: {
-                    slidesToShow: 1,
-                    slidesToScroll: 1,
-                    dots: false,
-                },
-            },
-        ],
-    }
+        fade: true,
+        arrows: false,
+        dotsClass: "slick-dots custom-dots-slider",
+    };
 
     return (
-        <div className="bg-gray-50 py-16">
-            <div className="max-w-7xl mx-auto px-4">
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-4">Customer Reviews</h2>
-                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                        Hear what our customers say about their experience with our authentic Kashmir pashminas
-                    </p>
+        <section className="py-24 relative overflow-hidden bg-background">
+            {/* Background Accents */}
+            <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 -skew-x-12 translate-x-1/2"></div>
+
+            <div className="max-w-5xl mx-auto px-6 relative z-10">
+                <div className="text-center mb-16">
+                    <span className="text-primary font-bold uppercase tracking-[0.3em] text-xs mb-4 block">Voices of Appreciation</span>
+                    <h2 className="text-4xl md:text-5xl font-serif text-foreground">Client Experiences</h2>
                 </div>
 
-                <Slider {...settings}>
-                    {testimonials.map((item, index) => (
-                        <div key={index} className="p-4">
-                            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                                <div className="flex items-center justify-between mb-6">
-                                    <BsChatQuote size={32} className="text-blue-600" />
-                                    <div className="flex">
-                                        {Array.from({ length: item.rating }).map((_, i) => (
-                                            <IoStar key={`star${i}`} className="text-yellow-400" size={20} />
-                                        ))}
-                                    </div>
-                                </div>
+                <div className="relative">
+                    <BsQuote className="absolute -top-12 -left-8 text-8xl text-primary/10 -z-10" />
 
-                                <p className="mb-6 text-gray-600 leading-relaxed">
-                                    "{item.review}"
-                                </p>
+                    <Slider {...settings} className="testimonial-slider">
+                        {testimonials.map((item, index) => (
+                            <div key={index} className="outline-none py-8">
+                                <div className="bg-white/50 backdrop-blur-xl border border-white rounded-[2.5rem] p-10 md:p-16 shadow-2xl relative overflow-hidden group">
+                                    <div className="absolute top-0 left-0 w-2 h-full bg-primary/10 group-hover:bg-primary transition-colors duration-500"></div>
 
-                                <div className="flex items-center">
-                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                                        <span className="font-semibold text-blue-600">
-                                            {item.name
-                                                .split(" ")
-                                                .map((n) => n[0])
-                                                .join("")}
-                                        </span>
+                                    <div className="flex flex-col items-center text-center">
+                                        <div className="flex gap-1 text-primary-foreground/40 mb-8">
+                                            {[...Array(5)].map((_, i) => (
+                                                <FaStar key={i} size={14} className="text-primary" />
+                                            ))}
+                                        </div>
+
+                                        <p className="text-2xl md:text-3xl font-serif text-foreground/90 leading-relaxed mb-12 italic max-w-3xl">
+                                            "{item.review}"
+                                        </p>
+
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-4 border border-primary/20">
+                                                {item.initials}
+                                            </div>
+                                            <h4 className="font-bold text-foreground uppercase tracking-widest text-sm mb-1">{item.name}</h4>
+                                            <p className="text-muted-foreground text-xs uppercase tracking-widest">
+                                                {item.role} • <span className="text-primary/70">{item.location}</span>
+                                            </p>
+                                        </div>
                                     </div>
-                                    <h4 className="font-semibold text-gray-900">{item.name}</h4>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </Slider>
+                        ))}
+                    </Slider>
+                </div>
             </div>
-        </div>
-    )
-}
 
-export default Testimonial
+            <style jsx global>{`
+                .custom-dots-slider {
+                    bottom: -40px !important;
+                }
+                .custom-dots-slider li {
+                    margin: 0 4px !important;
+                }
+                .custom-dots-slider li button:before {
+                    color: oklch(0.38 0.05 255) !important;
+                    opacity: 0.1 !important;
+                    font-size: 10px !important;
+                }
+                .custom-dots-slider li.slick-active button:before {
+                    opacity: 0.8 !important;
+                    color: oklch(0.38 0.05 255) !important;
+                }
+            `}</style>
+        </section>
+    );
+};
+
+export default Testimonial;

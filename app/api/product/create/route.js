@@ -23,7 +23,9 @@ export async function POST(request) {
             sellingPrice: true,
             discountPercentage: true,
             description: true,
-            media: true
+            media: true,
+            colors: true,
+            sizes: true
         })
 
 
@@ -43,6 +45,8 @@ export async function POST(request) {
             discountPercentage: productData.discountPercentage,
             description: encode(productData.description),
             media: productData.media,
+            colors: productData.colors || [],
+            sizes: productData.sizes || [],
         })
 
         await newProduct.save()

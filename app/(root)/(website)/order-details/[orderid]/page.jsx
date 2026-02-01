@@ -37,16 +37,17 @@ const OrderDetails = async ({ params }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {orderData && orderData?.data?.products?.map((product) => (
-                                    <tr key={product.variantId._id} className="md:table-row block border-b">
+                                {orderData && orderData?.data?.products?.map((product, index) => (
+                                    <tr key={`${product.productId}-${product.color}-${product.size}-${index}`} className="md:table-row block border-b">
                                         <td className="p-3">
                                             <div className="flex items-center gap-5">
-                                                <Image src={product?.variantId?.media[0]?.secure_url || placeholderImg.src} width={60} height={60} alt="product" className="rounded" />
+                                                <Image src={product?.media || placeholderImg.src} width={60} height={60} alt="product" className="rounded" />
                                                 <div>
                                                     <h4 className="text-lg line-clamp-1">
-                                                        <Link href={WEBSITE_PRODUCT_DETAILS(product?.productId?.slug)}>{product?.productId?.name}</Link>
-                                                        <p>Color: {product?.variantId?.color}</p>
-                                                        <p>Size: {product?.variantId?.size}</p>
+                                                        <Link href={WEBSITE_PRODUCT_DETAILS(product?.productId?.slug)}>{product?.name}</Link>
+                                                        <p>Color: {product?.color}</p>
+                                                        <p>Size: {product?.size}</p>
+                                                        {product?.productId?.category?.name && <p>Category: {product.productId.category.name}</p>}
                                                     </h4>
                                                 </div>
                                             </div>

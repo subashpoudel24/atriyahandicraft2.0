@@ -48,6 +48,8 @@ const AddProduct = () => {
     sellingPrice: true,
     discountPercentage: true,
     description: true,
+    colors: true,
+    sizes: true,
   })
 
   const form = useForm({
@@ -60,6 +62,8 @@ const AddProduct = () => {
       sellingPrice: 0,
       discountPercentage: 0,
       description: "",
+      colors: "",
+      sizes: "",
     },
   })
 
@@ -215,6 +219,36 @@ const AddProduct = () => {
                         <FormLabel>Discount Percentage <span className='text-red-500'>*</span></FormLabel>
                         <FormControl>
                           <Input type="number" readOnly placeholder="Enter Discount Percentage" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className=''>
+                  <FormField
+                    control={form.control}
+                    name="colors"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Colors</FormLabel>
+                        <FormControl>
+                          <Input type="text" placeholder="Enter colors (comma separated)" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className=''>
+                  <FormField
+                    control={form.control}
+                    name="sizes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sizes</FormLabel>
+                        <FormControl>
+                          <Input type="text" placeholder="Enter sizes (comma separated)" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

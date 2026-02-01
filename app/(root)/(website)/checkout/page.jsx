@@ -199,14 +199,24 @@ const Checkout = () => {
     // get order id 
     const getOrderId = async (amount) => {
         try {
+            console.log('Requesting order ID for amount:', amount)
+            
+            // Test API first
+            const { data: testData } = await axios.post('/api/test-razorpay', { amount })
+            console.log('Test API response:', testData)
+            
             const { data: orderIdData } = await axios.post('/api/payment/get-order-id', { amount })
+            console.log('Order ID API response:', orderIdData)
+            
             if (!orderIdData.success) {
-                throw new Error(orderIdData.message)
+                console.error('Order ID generation failed:', orderIdData)
+                throw new Error(orderIdData.message || 'Failed to generate order ID')
             }
 
             return { success: true, order_id: orderIdData.data }
 
         } catch (error) {
+            console.error('Error in getOrderId:', error)
             return { success: false, message: error.message }
         }
     }
@@ -216,11 +226,13 @@ const Checkout = () => {
         try {
             const products = verifiedCartData.map((cartItem) => ({
                 productId: cartItem.productId,
-                variantId: cartItem.variantId,
                 name: cartItem.name,
                 qty: cartItem.qty,
                 mrp: cartItem.mrp,
                 sellingPrice: cartItem.sellingPrice,
+                color: cartItem.color,
+                size: cartItem.size,
+                media: cartItem.media
             }))
 
             const { data: response } = await axios.post('/api/payment/cod-order', {
@@ -229,7 +241,12 @@ const Checkout = () => {
                 subtotal,
                 discount,
                 couponDiscountAmount,
-                totalAmount
+                totalAmount,
+                coupon: isCouponApplied ? {
+                    code: couponCode,
+                    discountAmount: couponDiscountAmount,
+                    couponId: couponCode // You may need to store the actual coupon ID
+                } : null
             })
 
             if (response.success) {
@@ -304,11 +321,13 @@ const Checkout = () => {
                     try {
                         const products = verifiedCartData.map((cartItem) => ({
                             productId: cartItem.productId,
-                            variantId: cartItem.variantId,
                             name: cartItem.name,
                             qty: cartItem.qty,
                             mrp: cartItem.mrp,
                             sellingPrice: cartItem.sellingPrice,
+                            color: cartItem.color,
+                            size: cartItem.size,
+                            media: cartItem.media
                         }))
 
                         const { data: paymentResponseData } = await axios.post('/api/payment/save-order', {
@@ -318,7 +337,12 @@ const Checkout = () => {
                             subtotal: subtotal,
                             discount: discount,
                             couponDiscountAmount: couponDiscountAmount,
-                            totalAmount: totalAmount
+                            totalAmount: totalAmount,
+                            coupon: isCouponApplied ? {
+                                code: couponCode,
+                                discountAmount: couponDiscountAmount,
+                                couponId: couponCode // You may need to store the actual coupon ID
+                            } : null
                         })
 
                         if (paymentResponseData.success) {
@@ -356,7 +380,13 @@ const Checkout = () => {
             });
 
             console.log('Opening Razorpay checkout...')
-            rzp.open()
+            try {
+                rzp.open()
+                console.log('Razorpay popup opened successfully')
+            } catch (openError) {
+                console.error('Error opening Razorpay popup:', openError)
+                throw new Error('Failed to open payment popup: ' + openError.message)
+            }
 
         } catch (error) {
             showToast('error', error.message)
@@ -596,8 +626,8 @@ const Checkout = () => {
 
                                 <table className='w-full border'>
                                     <tbody>
-                                        {verifiedCartData && verifiedCartData?.map(product => (
-                                            <tr key={product.variantId}>
+                                        {verifiedCartData && verifiedCartData?.map((product, index) => (
+                                            <tr key={`${product.productId}-${product.color}-${product.size}`}>
                                                 <td className='p-3'>
                                                     <div className='flex items-center gap-5'>
                                                         <Image src={product.media} width={60} height={60} alt={product.name} className='rounded' />

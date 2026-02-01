@@ -1,13 +1,22 @@
 import GlobalProvider from "@/components/Application/GlobalProvider";
 import "./globals.css";
 import "../styles/loading.css";
-import { Assistant } from 'next/font/google'
+import { Playfair_Display, Inter } from 'next/font/google'
 import { ToastContainer } from 'react-toastify';
 import ClientLayout from "@/components/ClientLayout";
-const assistantFont = Assistant({
-  weight: ['400', '500', '600', '700', '800'],
+
+const playfairDisplay = Playfair_Display({
+  weight: ['400', '500', '600', '700', '800', '900'],
   subsets: ['latin'],
-  display: 'swap'
+  display: 'swap',
+  variable: '--font-serif'
+})
+
+const inter = Inter({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans'
 })
 
 export const metadata = {
@@ -17,9 +26,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" crxemulator="">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${assistantFont.className} antialiased`}
+        className={`${playfairDisplay.variable} ${inter.variable} font-sans antialiased`}
+        suppressHydrationWarning
       >
         <GlobalProvider>
           <ToastContainer />

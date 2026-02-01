@@ -11,7 +11,8 @@ export const cartReducer = createSlice({
         addIntoCart: (state, action) => {
             const payload = action.payload
             const existingProduct = state.products.findIndex(
-                (product) => product && product.productId === payload.productId && product.variantId === payload.variantId
+                (product) => product && product.productId === payload.productId && 
+                product.color === payload.color && product.size === payload.size
             )
 
             if (existingProduct < 0) {
@@ -20,9 +21,9 @@ export const cartReducer = createSlice({
             }
         },
         increaseQuantity: (state, action) => {
-            const { productId, variantId } = action.payload
+            const { productId, color, size } = action.payload
             const existingProduct = state.products.findIndex(
-                (product) => product.productId === productId && product.variantId === variantId
+                (product) => product.productId === productId && product.color === color && product.size === size
             )
 
             if (existingProduct >= 0) {
@@ -30,9 +31,9 @@ export const cartReducer = createSlice({
             }
         },
         decreaseQuantity: (state, action) => {
-            const { productId, variantId } = action.payload
+            const { productId, color, size } = action.payload
             const existingProduct = state.products.findIndex(
-                (product) => product.productId === productId && product.variantId === variantId
+                (product) => product.productId === productId && product.color === color && product.size === size
             )
 
             if (existingProduct >= 0) {
@@ -42,9 +43,9 @@ export const cartReducer = createSlice({
             }
         },
         removeFromCart: (state, action) => {
-            const { productId, variantId } = action.payload
+            const { productId, color, size } = action.payload
 
-            state.products = state.products.filter((product) => product && !(product.productId === productId && product.variantId === variantId))
+            state.products = state.products.filter((product) => product && !(product.productId === productId && product.color === color && product.size === size))
 
             state.count = state.products.filter(product => product).length
         },

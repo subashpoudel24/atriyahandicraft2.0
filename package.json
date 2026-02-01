@@ -44,6 +44,7 @@
     "dayjs": "^1.11.13",
     "entities": "^6.0.0",
     "export-to-csv": "^1.4.0",
+    "framer-motion": "^12.29.2",
     "fuse.js": "^7.1.0",
     "gsap": "^3.13.0",
     "input-otp": "^1.4.2",

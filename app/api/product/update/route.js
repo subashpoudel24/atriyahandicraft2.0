@@ -24,7 +24,9 @@ export async function PUT(request) {
             sellingPrice: true,
             discountPercentage: true,
             description: true,
-            media: true
+            media: true,
+            colors: true,
+            sizes: true
         })
         const validate = schema.safeParse(payload)
         if (!validate.success) {
@@ -32,11 +34,14 @@ export async function PUT(request) {
         }
 
         const validatedData = validate.data
+        console.log('Validated data:', validatedData)
 
         const getProduct = await ProductModel.findOne({ deletedAt: null, _id: validatedData._id })
         if (!getProduct) {
             return response(false, 404, 'Data not found.')
         }
+
+        console.log('Before update - colors:', getProduct.colors, 'sizes:', getProduct.sizes)
 
         getProduct.name = validatedData.name
         getProduct.slug = validatedData.slug
@@ -46,7 +51,14 @@ export async function PUT(request) {
         getProduct.discountPercentage = validatedData.discountPercentage
         getProduct.description = encode(validatedData.description)
         getProduct.media = validatedData.media
+        getProduct.colors = validatedData.colors || []
+        getProduct.sizes = validatedData.sizes || []
+        
+        console.log('After update - colors:', getProduct.colors, 'sizes:', getProduct.sizes)
+        
         await getProduct.save()
+        
+        console.log('Product saved successfully')
 
         return response(true, 200, 'Product updated successfully.')
 

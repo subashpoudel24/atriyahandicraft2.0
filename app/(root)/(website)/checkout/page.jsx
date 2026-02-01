@@ -186,7 +186,7 @@ const Checkout = () => {
         script.onerror = () => {
             console.error('Failed to load Razorpay script')
         }
-        
+
         if (!document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')) {
             document.head.appendChild(script)
         } else if (window.Razorpay) {
@@ -200,14 +200,14 @@ const Checkout = () => {
     const getOrderId = async (amount) => {
         try {
             console.log('Requesting order ID for amount:', amount)
-            
+
             // Test API first
             const { data: testData } = await axios.post('/api/test-razorpay', { amount })
             console.log('Test API response:', testData)
-            
+
             const { data: orderIdData } = await axios.post('/api/payment/get-order-id', { amount })
             console.log('Order ID API response:', orderIdData)
-            
+
             if (!orderIdData.success) {
                 console.error('Order ID generation failed:', orderIdData)
                 throw new Error(orderIdData.message || 'Failed to generate order ID')
@@ -268,11 +268,11 @@ const Checkout = () => {
         if (paymentMethod === 'cod') {
             return placeOrderCOD(formData)
         }
- 
+
         console.log('Starting online payment process...')
         console.log('Total Amount:', totalAmount)
         console.log('Form Data:', formData)
-        
+
         setPlacingOrder(true)
         try {
             // Wait for Razorpay to load
@@ -283,7 +283,7 @@ const Checkout = () => {
                     if (window.Razorpay) break
                     await new Promise(resolve => setTimeout(resolve, 100))
                 }
-                
+
                 if (!window.Razorpay) {
                     throw new Error('Payment gateway failed to load. Please refresh and try again.')
                 }
@@ -293,7 +293,7 @@ const Checkout = () => {
             console.log('Generating order ID...')
             const generateOrderId = await getOrderId(totalAmount)
             console.log('Order ID response:', generateOrderId)
-            
+
             if (!generateOrderId.success) {
                 throw new Error(generateOrderId.message)
             }
@@ -311,7 +311,7 @@ const Checkout = () => {
             const razOption = {
                 "key": razorpayKey,
                 "amount": Math.round(totalAmount * 100), // Ensure integer
-                "currency": "INR",
+                "currency": "USD",
                 "name": "Atriya Handicrafts",
                 "description": "Payment for order",
                 "image": "https://res.cloudinary.com/dg7efdu9o/image/upload/v1750052410/logo-black_mb1rve.webp",
@@ -370,9 +370,9 @@ const Checkout = () => {
             }
 
             console.log('Razorpay options:', razOption)
-            
+
             const rzp = new window.Razorpay(razOption)
-            
+
             rzp.on('payment.failed', function (response) {
                 console.error('Payment failed:', response)
                 showToast('error', response.error.description || 'Payment failed')
@@ -580,9 +580,9 @@ const Checkout = () => {
                                             <h4 className='font-semibold mb-3'>Payment Method</h4>
                                             <div className='space-y-2'>
                                                 <label className='flex items-center gap-2 cursor-pointer'>
-                                                    <input 
-                                                        type='radio' 
-                                                        name='paymentMethod' 
+                                                    <input
+                                                        type='radio'
+                                                        name='paymentMethod'
                                                         value='online'
                                                         checked={paymentMethod === 'online'}
                                                         onChange={(e) => setPaymentMethod(e.target.value)}
@@ -591,9 +591,9 @@ const Checkout = () => {
                                                     <span>Online Payment (Razorpay)</span>
                                                 </label>
                                                 <label className='flex items-center gap-2 cursor-pointer'>
-                                                    <input 
-                                                        type='radio' 
-                                                        name='paymentMethod' 
+                                                    <input
+                                                        type='radio'
+                                                        name='paymentMethod'
                                                         value='cod'
                                                         checked={paymentMethod === 'cod'}
                                                         onChange={(e) => setPaymentMethod(e.target.value)}
@@ -606,11 +606,11 @@ const Checkout = () => {
                                     </div>
 
                                     <div className='mb-3 col-span-2'>
-                                        <ButtonLoading 
-                                            type="submit" 
-                                            text={paymentMethod === 'cod' ? 'Place COD Order' : 'Place Order'} 
-                                            loading={placingOrder || savingOrder} 
-                                            className="bg-black rounded-full px-5 cursor-pointer w-full" 
+                                        <ButtonLoading
+                                            type="submit"
+                                            text={paymentMethod === 'cod' ? 'Place COD Order' : 'Place Order'}
+                                            loading={placingOrder || savingOrder}
+                                            className="bg-black rounded-full px-5 cursor-pointer w-full"
                                         />
                                     </div>
 
@@ -642,7 +642,7 @@ const Checkout = () => {
                                                 </td>
                                                 <td className='p-3 text-center'>
                                                     <p className='text-nowrap text-sm'>
-                                                        {product.qty} x {product.sellingPrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
+                                                        {product.qty} x {product.sellingPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                                     </p>
                                                 </td>
                                             </tr>
@@ -655,25 +655,25 @@ const Checkout = () => {
                                         <tr>
                                             <td className='font-medium py-2'>Subtotal</td>
                                             <td className='text-end py-2'>
-                                                {subtotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
+                                                {subtotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td className='font-medium py-2'>Discount</td>
                                             <td className='text-end py-2'>
-                                                - {discount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
+                                                - {discount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td className='font-medium py-2'>Coupon Discount</td>
                                             <td className='text-end py-2'>
-                                                -  {couponDiscountAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
+                                                -  {couponDiscountAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td className='font-medium py-2 text-xl'>Total</td>
                                             <td className='text-end py-2'>
-                                                {totalAmount.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}
+                                                {totalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                             </td>
                                         </tr>
                                     </tbody>

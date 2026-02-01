@@ -27,13 +27,13 @@ const ProductDetails = ({ product, reviewCount }) => {
 
     const dispatch = useDispatch()
     const cartStore = useSelector(store => store.cartStore)
-    
+
     const [activeThumb, setActiveThumb] = useState()
     const [qty, setQty] = useState(1)
     const [isAddedIntoCart, setIsAddedIntoCart] = useState(false)
     const [selectedColor, setSelectedColor] = useState('')
     const [selectedSize, setSelectedSize] = useState('')
-    
+
     useEffect(() => {
         if (product?.media?.[0]) {
             const imageUrl = product.media[0].secure_url || product.media[0].path
@@ -46,10 +46,10 @@ const ProductDetails = ({ product, reviewCount }) => {
 
     useEffect(() => {
         if (cartStore.count > 0 && selectedColor && selectedSize && product?._id) {
-            const existingProduct = cartStore.products.findIndex((cartProduct) => 
-                cartProduct && 
-                cartProduct.productId === product._id && 
-                cartProduct.color === selectedColor && 
+            const existingProduct = cartStore.products.findIndex((cartProduct) =>
+                cartProduct &&
+                cartProduct.productId === product._id &&
+                cartProduct.color === selectedColor &&
                 cartProduct.size === selectedSize
             )
             setIsAddedIntoCart(existingProduct >= 0)
@@ -146,9 +146,8 @@ const ProductDetails = ({ product, reviewCount }) => {
                                     width={100}
                                     height={100}
                                     alt={`${product?.name} view ${index + 1}`}
-                                    className={`md:max-w-full max-w-16 rounded cursor-pointer transition-all duration-200 hover:scale-105 ${
-                                        thumbUrl === activeThumb ? 'border-2 border-primary shadow-md' : 'border hover:border-primary/50'
-                                    }`}
+                                    className={`md:max-w-full max-w-16 rounded cursor-pointer transition-all duration-200 hover:scale-105 ${thumbUrl === activeThumb ? 'border-2 border-primary shadow-md' : 'border hover:border-primary/50'
+                                        }`}
                                     onClick={() => handleThumb(thumbUrl)}
                                     onError={(e) => {
                                         e.target.src = imgPlaceholder.src
@@ -168,8 +167,8 @@ const ProductDetails = ({ product, reviewCount }) => {
                         <span className="text-sm ps-2">({reviewCount} Reviews)</span>
                     </div>
                     <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xl font-semibold">{product.sellingPrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
-                        <span className="text-sm line-through text-gray-500">{product.mrp.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span>
+                        <span className="text-xl font-semibold">{product.sellingPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>
+                        <span className="text-sm line-through text-gray-500">{product.mrp.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>
                         <span className="bg-red-500 rounded-2xl px-3 py-1 text-white text-xs ms-5">-{product.discountPercentage}%</span>
                     </div>
 
@@ -186,11 +185,10 @@ const ProductDetails = ({ product, reviewCount }) => {
                                     <button
                                         key={index}
                                         onClick={() => setSelectedColor(color)}
-                                        className={`border py-2 px-4 rounded-lg text-sm transition-colors ${
-                                            selectedColor === color
+                                        className={`border py-2 px-4 rounded-lg text-sm transition-colors ${selectedColor === color
                                                 ? 'bg-primary text-white border-primary'
                                                 : 'bg-secondary hover:bg-primary hover:text-white'
-                                        }`}
+                                            }`}
                                     >
                                         {color}
                                     </button>
@@ -210,11 +208,10 @@ const ProductDetails = ({ product, reviewCount }) => {
                                     <button
                                         key={index}
                                         onClick={() => setSelectedSize(size)}
-                                        className={`border py-2 px-4 rounded-lg text-sm transition-colors ${
-                                            selectedSize === size
+                                        className={`border py-2 px-4 rounded-lg text-sm transition-colors ${selectedSize === size
                                                 ? 'bg-primary text-white border-primary'
                                                 : 'bg-secondary hover:bg-primary hover:text-white'
-                                        }`}
+                                            }`}
                                     >
                                         {size}
                                     </button>

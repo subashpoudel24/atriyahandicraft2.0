@@ -1,49 +1,53 @@
 import React from 'react'
 import ProductDetails from '@/app/(root)/(website)/product/[slug]/ProductDetails'
+import { connectDB } from "@/lib/databaseConnection";
+import ProductModel from "@/models/Product.model";
+import ReviewModel from "@/models/Review.model";
 
 const ProductPage = async ({ params, searchParams }) => {
     const { slug } = await params
     const { color, size } = await searchParams
 
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
-        const url = new URL(`/api/product/details/${slug}`, baseUrl)
-        
-        if (color && size) {
-            url.searchParams.set('color', color)
-            url.searchParams.set('size', size)
+        await connectDB()
+
+        const filter = {
+            slug: slug,
+            deletedAt: null
         }
 
-        const response = await fetch(url.toString())
-        const getProduct = await response.json()
-        
-        console.log('API Response:', getProduct)
-        console.log('API URL:', url.toString())
+        // Get product directly from DB to avoid fetch issues on Vercel
+        const getProduct = await ProductModel.findOne(filter).populate('media', 'secure_url').lean()
 
-        if (!getProduct.success || !response.ok) {
-            console.log('API Error:', getProduct)
+        if (!getProduct) {
             return (
-                <div className='flex justify-center items-center py-10 h-[300px]'>
+                <div className='flex justify-center items-center py-32 min-h-[50vh]'>
                     <div className='text-center'>
-                        <h1 className='text-4xl font-semibold mb-4'>Data not found.</h1>
-                        <p className='text-gray-600'>Product: {slug}</p>
-                        <p className='text-gray-600'>Color: {color || 'None'}</p>
-                        <p className='text-gray-600'>Size: {size || 'None'}</p>
+                        <h1 className='text-4xl font-serif mb-4 text-foreground'>Piece Not Found</h1>
+                        <p className='text-muted-foreground'>The heritage piece you are looking for may have been moved or archived.</p>
+                        <p className='text-muted-foreground mt-4 italic'>Reference: {slug}</p>
                     </div>
                 </div>
             )
         }
 
+        // Get review count
+        const reviewCount = await ReviewModel.countDocuments({ product: getProduct._id })
+
         return (
             <ProductDetails
-                product={getProduct?.data?.product}
-                reviewCount={getProduct?.data?.reviewCount}
+                product={JSON.parse(JSON.stringify(getProduct))}
+                reviewCount={reviewCount}
             />
         )
     } catch (error) {
+        console.error('Error fetching product details:', error)
         return (
-            <div className='flex justify-center items-center py-10 h-[300px]'>
-                <h1 className='text-4xl font-semibold'>Product not found.</h1>
+            <div className='flex justify-center items-center py-32 min-h-[50vh]'>
+                <div className='text-center'>
+                    <h1 className='text-4xl font-serif mb-4'>Error Loading Collection</h1>
+                    <p className='text-muted-foreground'>We encountered an issue retrieving this piece. Please try again later.</p>
+                </div>
             </div>
         )
     }
